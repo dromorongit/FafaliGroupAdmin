@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fafali Group</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Fafali Group</h2>
+                <p>Admin Panel</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="overview">
+                    <span class="icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="nav-item" data-section="applications">
+                    <span class="icon">📋</span>
+                    <span>Applications</span>
+                </a>
+                <a href="#" class="nav-item" data-section="documents">
+                    <span class="icon">📄</span>
+                    <span>Documents</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="user-info">
+                    <span id="userName">Admin User</span>
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <section id="overviewSection" class="content-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-info">
+                            <h3>Total Applications</h3>
+                            <p id="totalApplications" class="stat-number">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-info">
+                            <h3>Total Documents</h3>
+                            <p id="totalDocuments" class="stat-number">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <h3>Pending Review</h3>
+                            <p id="pendingApplications" class="stat-number">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3>Approved</h3>
+                            <p id="approvedApplications" class="stat-number">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-section">
+                    <h2>Recent Applications</h2>
+                    <div id="recentApplications" class="recent-list">
+                        <p class="loading-text">Loading...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Applications Section -->
+            <section id="applicationsSection" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Manage Applications</h2>
+                    <button id="refreshAppsBtn" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Applicant Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsTableBody">
+                            <tr><td colspan="6" class="loading-text">Loading applications...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Documents Section -->
+            <section id="documentsSection" class="content-section hidden">
+                <div class="section-header">
+                    <h2>Manage Documents</h2>
+                    <button id="refreshDocsBtn" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Filename</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Uploaded</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentsTableBody">
+                            <tr><td colspan="6" class="loading-text">Loading documents...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="content-section hidden">
+                <h2>Admin Settings</h2>
+                <div class="settings-card">
+                    <h3>Profile Settings</h3>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="profileName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profileEmail" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" id="profileRole" disabled>
+                        </div>
+                    </form>
+                </div>
+                <div class="settings-card">
+                    <h3>System Information</h3>
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Environment:</strong> Development</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Application Detail Modal -->
+    <div id="applicationModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Application Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="applicationModalBody" class="modal-body">
+                <!-- Content loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">Close</button>
+                <button id="rejectAppBtn" class="btn btn-danger">Reject</button>
+                <button id="approveAppBtn" class="btn btn-success">Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

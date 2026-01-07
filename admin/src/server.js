@@ -6,6 +6,7 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -28,6 +29,9 @@ const PORT = process.env.PORT || 3000;
 
 // Trust proxy for accurate IP addresses
 app.set('trust proxy', 1);
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Security middleware
 app.use(helmet({
@@ -62,6 +66,16 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Apply general rate limiter to all admin routes
 app.use('/admin/api', apiRateLimiter);
+
+// Root route - serve login page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Dashboard route - serve dashboard page
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
 
 // Health check endpoint
 app.get('/admin/health', (req, res) => {

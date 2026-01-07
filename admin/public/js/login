@@ -1,0 +1,53 @@
+// Login page JavaScript
+const API_BASE = '/admin/api';
+
+async function login(email, password) {
+    try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Store tokens
+            localStorage.setItem('accessToken', data.data.accessToken);
+            localStorage.setItem('refreshToken', data.data.refreshToken);
+            localStorage.setItem('user', JSON.stringify(data.data.user));
+            
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
+        } else {
+            showError(data.error || 'Login failed');
+        }
+    } catch (error) {
+        showError('Connection error. Please try again.');
+    }
+}
+
+function showError(message) {
+    const errorEl = document.getElementById('errorMessage');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+}
+
+// Form submission handler
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    // Hide any previous error
+    document.getElementById('errorMessage').style.display = 'none';
+    
+    // Attempt login
+    login(email, password);
+});
+
+// Check if already logged in
+if (localStorage.getItem('accessToken')) {
+    window.location.href = '/dashboard';
+}
