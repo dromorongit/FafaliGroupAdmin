@@ -33,7 +33,6 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const applicationRoutes = require('./routes/applications');
 const documentRoutes = require('./routes/documents');
-const path = require('path');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
