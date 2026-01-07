@@ -1,22 +1,10 @@
 {
   "services": [
     {
-      "name": "backend",
-      "source": "./backend",
-      "start": "node server.js",
-      "install": "npm install",
+      "name": "fafali-visa-admin",
+      "start": "node backend/server.js",
       "env": {
         "NODE_ENV": "production"
-      }
-    },
-    {
-      "name": "frontend",
-      "source": "./frontend",
-      "start": "npm run build && npm run start",
-      "install": "npm install",
-      "env": {
-        "NODE_ENV": "production",
-        "REACT_APP_API_URL": "https://your-railway-app-url.up.railway.app/api"
       }
     }
   ]
