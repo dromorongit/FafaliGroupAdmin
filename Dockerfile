@@ -26,4 +26,5 @@ RUN cd frontend && npm run build
 EXPOSE 5000
 
 # Start the application
+ENV NODE_ENV=production
 CMD ["node", "backend/server.js"]
