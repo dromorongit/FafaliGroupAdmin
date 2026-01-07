@@ -11,13 +11,13 @@ COPY package*.json ./
 COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 
+# Copy all files
+COPY . .
+
 # Install dependencies
 RUN npm install
 RUN cd backend && npm install
-RUN cd ../frontend && npm install
-
-# Copy all files
-COPY . .
+RUN cd frontend && npm install
 
 # Build frontend
 RUN cd frontend && npm run build
