@@ -1,7 +1,7 @@
 # Dockerfile for Fafali Group Visa Admin System
 
-# Use official Node.js image
-FROM node:20-alpine
+# Use official Node.js image (not alpine to avoid bcrypt issues)
+FROM node:20
 
 # Set working directory
 WORKDIR /app
