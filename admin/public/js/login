@@ -3,11 +3,11 @@ const API_BASE = '/admin/api';
 
 async function login(email, password) {
     const btn = document.querySelector('.btn-primary');
-    const btnText = btn.querySelector('.btn-text');
+    const originalText = btn.innerHTML;
     
     // Show loading state
     btn.classList.add('loading');
-    btnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
     
     try {
         const response = await fetch(`${API_BASE}/auth/login`, {
@@ -25,7 +25,7 @@ async function login(email, password) {
             localStorage.setItem('user', JSON.stringify(data.data.user));
             
             // Change button text
-            btnText.innerHTML = '<i class="fas fa-check"></i> Success!';
+            btn.innerHTML = '<i class="fas fa-check"></i> Success!';
             btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
             
             // Redirect to dashboard
@@ -35,13 +35,13 @@ async function login(email, password) {
         } else {
             // Reset button
             btn.classList.remove('loading');
-            btnText.textContent = 'Sign In';
+            btn.innerHTML = originalText;
             showError(data.error || 'Login failed');
         }
     } catch (error) {
         // Reset button
         btn.classList.remove('loading');
-        btnText.textContent = 'Sign In';
+        btn.innerHTML = originalText;
         showError('Connection error. Please try again.');
     }
 }
