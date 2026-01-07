@@ -94,4 +94,25 @@ router.post(
   authController.resetPassword
 );
 
+/**
+ * @route POST /admin/api/auth/change-password
+ * @desc Change password for logged-in user
+ * @access Private
+ */
+router.post(
+  '/change-password',
+  authenticate,
+  [
+    body('currentPassword')
+      .notEmpty()
+      .withMessage('Current password is required'),
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters')
+      .matches(/\d/)
+      .withMessage('Password must contain at least one number')
+  ],
+  authController.changePassword
+);
+
 module.exports = router;

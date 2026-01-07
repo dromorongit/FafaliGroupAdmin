@@ -4,6 +4,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const AdminUser = require('../models/AdminUser');
 const auditService = require('../services/auditService');
 
@@ -330,11 +331,98 @@ const resetPassword = async (req, res) => {
   }
 };
 
+/**
+ * @route POST /admin/api/auth/change-password
+ * @desc Change password for logged-in user
+ * @access Private
+ */
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'Current password and new password are required.'
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password must be at least 8 characters.'
+      });
+    }
+
+    // Get user with password
+    const user = await AdminUser.findById(req.user._id).select('+passwordHash');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found.'
+      });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+
+    if (!isMatch) {
+      await auditService.logEvent(req.user._id, 'password_change_failed', 'Invalid current password', req);
+      return res.status(401).json({
+        success: false,
+        error: 'Current password is incorrect.'
+      });
+    }
+
+    // Hash new password
+    const rounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
+    user.passwordHash = await bcrypt.hash(newPassword, rounds);
+
+    // Invalidate all refresh tokens for security
+    user.refreshTokens = [];
+
+    await user.save();
+
+    // Log password change
+    await auditService.logEvent(req.user._id, 'password_changed', 'Password updated successfully', req);
+
+    // Generate new tokens
+    const tokens = generateTokens(user._id);
+
+    const refreshTokenExpiry = new Date();
+    refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 7);
+
+    user.refreshTokens.push({
+      token: tokens.refreshToken,
+      expiresAt: refreshTokenExpiry
+    });
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully. Please log in again.',
+      data: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+      }
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'An error occurred changing password.'
+    });
+  }
+};
+
 module.exports = {
   login,
   logout,
   refresh,
   forgotPassword,
   resetPassword,
+  changePassword,
   generateTokens
 };
