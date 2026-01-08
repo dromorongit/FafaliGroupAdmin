@@ -139,7 +139,7 @@ document.getElementById('visa-application-form').addEventListener('submit', asyn
   };
   
   try {
-    const response = await fetch('https://YOUR_ADMIN_DOMAIN.com/api/public/applications', {
+    const response = await fetch('https://YOUR_ADMIN_URL.up.railway.app/api/public/applications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -181,7 +181,7 @@ document.getElementById('status-check-form').addEventListener('submit', async (e
   const email = document.getElementById('statusEmail').value;
   
   try {
-    const response = await fetch(`https://YOUR_ADMIN_DOMAIN.com/api/public/applications/status?referenceNumber=${encodeURIComponent(referenceNumber)}&email=${encodeURIComponent(email)}`);
+    const response = await fetch(`https://YOUR_ADMIN_URL.up.railway.app/api/public/applications/status?referenceNumber=${encodeURIComponent(referenceNumber)}&email=${encodeURIComponent(email)}`);
     
     const result = await response.json();
     
@@ -232,7 +232,7 @@ document.getElementById('document-upload-form').addEventListener('submit', async
   formData.append('document', document.getElementById('documentFile').files[0]);
   
   try {
-    const response = await fetch('https://YOUR_ADMIN_DOMAIN.com/api/public/documents/upload', {
+    const response = await fetch('https://YOUR_ADMIN_URL.up.railway.app/api/public/documents/upload', {
       method: 'POST',
       body: formData
       // Headers are set automatically for FormData
@@ -262,7 +262,7 @@ document.getElementById('document-upload-form').addEventListener('submit', async
 ```javascript
 // In backend/server.js
 const corsOptions = {
-  origin: ['https://your-website.com', 'https://www.your-website.com'],
+  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org'],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 };
@@ -276,19 +276,19 @@ app.use(cors(corsOptions));
 
 1. **Test Application Submission**:
 ```bash
-curl -X POST https://YOUR_ADMIN_DOMAIN.com/api/public/applications \
+curl -X POST https://YOUR_ADMIN_URL.up.railway.app/api/public/applications \
   -H "Content-Type: application/json" \
   -d '{"applicantName":"Test User","email":"test@example.com","visaType":"Tourist Visa","travelPurpose":"Testing"}'
 ```
 
 2. **Test Status Check**:
 ```bash
-curl -X GET "https://YOUR_ADMIN_DOMAIN.com/api/public/applications/status?referenceNumber=FAF-123456&email=test@example.com"
+curl -X GET "https://YOUR_ADMIN_URL.up.railway.app/api/public/applications/status?referenceNumber=FAF-123456&email=test@example.com"
 ```
 
 3. **Test Document Upload**:
 ```bash
-curl -X POST https://YOUR_ADMIN_DOMAIN.com/api/public/documents/upload \
+curl -X POST https://YOUR_ADMIN_URL.up.railway.app/api/public/documents/upload \
   -F "referenceNumber=FAF-123456" \
   -F "email=test@example.com" \
   -F "documentType=Passport Copy" \
@@ -319,7 +319,7 @@ curl -X POST https://YOUR_ADMIN_DOMAIN.com/api/public/documents/upload \
 
 ## Support Information
 
-**API Base URL**: `https://YOUR_ADMIN_DOMAIN.com/api/public/`
+**API Base URL**: `https://YOUR_ADMIN_URL.up.railway.app/api/public/`
 
 **Required Headers**:
 - `Content-Type: application/json` (for JSON requests)
