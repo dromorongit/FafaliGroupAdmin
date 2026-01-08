@@ -9,7 +9,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org'],
+  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org', 'https://dromorongit.github.io/Fafali-Group/'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type']
 }));
