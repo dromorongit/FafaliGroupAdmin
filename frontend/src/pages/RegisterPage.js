@@ -34,7 +34,7 @@ const RegisterPage = () => {
 
     try {
       // For the first user, we'll register them as a super admin
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/api/auth/register-first', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

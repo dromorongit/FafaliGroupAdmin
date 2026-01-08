@@ -42,6 +42,52 @@ const authController = {
     }
   },
   
+  // Register first user (no auth required)
+  registerFirstUser: async (req, res) => {
+    try {
+      const { firstName, lastName, email, password, role } = req.body;
+      
+      // Check if any users already exist
+      const userCount = await User.countDocuments();
+      if (userCount > 0) {
+        return res.status(403).json({ message: 'First user already exists. Use regular registration.' });
+      }
+      
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: 'User already exists' });
+      }
+      
+      // Create new user as super admin
+      const user = new User({
+        firstName,
+        lastName,
+        email,
+        password,
+        role: 'super_admin' // First user must be super admin
+      });
+      
+      await user.save();
+      
+      // Generate token
+      const token = jwt.generateToken(user._id, user.role);
+      
+      res.status(201).json({
+        token,
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role
+        }
+      });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  },
+  
   // Login user
   login: async (req, res) => {
     try {

@@ -8,6 +8,11 @@ const auth = require('../middleware/auth');
 // @access  Private
 router.post('/register', auth(['super_admin']), authController.register);
 
+// @route   POST /api/auth/register-first
+// @desc    Register first user (no auth required)
+// @access  Public
+router.post('/register-first', authController.registerFirstUser);
+
 // @route   POST /api/auth/login
 // @desc    Login user
 // @access  Public
