@@ -1,11 +1,18 @@
 {
+  "$schema": "https://railway.app/schema.json",
   "services": [
     {
       "name": "fafali-visa-admin",
+      "build": {
+        "command": "cd frontend && npm install && npm run build",
+        "builder": "nixpacks"
+      },
       "start": "node backend/server.js",
       "env": {
         "NODE_ENV": "production"
-      }
+      },
+      "mountDir": ".",
+      "rootDir": "."
     }
   ]
 }
