@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { FaFileAlt, FaCheckCircle, FaTimesCircle, FaClock, FaQuestionCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaFileAlt, FaCheckCircle, FaTimesCircle, FaClock, FaQuestionCircle, FaExclamationCircle, FaUsers, FaChartBar, FaClipboardList } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const DashboardPage = () => {
@@ -37,7 +37,7 @@ const DashboardPage = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border-l-4 border-red-400 p-4">
+      <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
         <div className="flex">
           <div className="flex-shrink-0">
             <FaExclamationCircle className="h-5 w-5 text-red-400" />
@@ -68,62 +68,78 @@ const DashboardPage = () => {
     'Rejected': 'bg-red-100 text-red-800'
   };
 
+  const statusGradientColors = {
+    'Draft': 'from-gray-100 to-gray-200',
+    'Submitted': 'from-blue-100 to-blue-200',
+    'Under Review': 'from-yellow-100 to-yellow-200',
+    'Queried': 'from-purple-100 to-purple-200',
+    'Approved': 'from-green-100 to-green-200',
+    'Rejected': 'from-red-100 to-red-200'
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Welcome section */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.firstName}!</h1>
-        <p className="text-gray-600 mt-1">Here's an overview of your visa application management system.</p>
+      <div className="bg-gradient-to-r from-primary-600 to-blue-600 text-white rounded-2xl p-8 shadow-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Welcome back, {user?.firstName}!</h1>
+            <p className="text-primary-100 mt-2 text-lg">Here's an overview of your visa application management system.</p>
+          </div>
+          <div className="hidden md:block">
+            <FaChartBar className="h-16 w-16 opacity-20" />
+          </div>
+        </div>
       </div>
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow-xl rounded-2xl p-6 border border-primary-50 hover:shadow-2xl transition-all duration-300">
           <div className="flex items-center">
-            <div className="bg-primary-100 p-3 rounded-full">
-              <FaFileAlt className="text-primary-600 text-xl" />
+            <div className="bg-primary-100 p-4 rounded-xl">
+              <FaFileAlt className="text-primary-600 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm text-gray-500">Total Applications</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.total || 0}</p>
+              <p className="text-sm text-gray-500 font-medium">Total Applications</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.total || 0}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow-xl rounded-2xl p-6 border border-yellow-50 hover:shadow-2xl transition-all duration-300">
           <div className="flex items-center">
-            <div className="bg-yellow-100 p-3 rounded-full">
-              <FaClock className="text-yellow-600 text-xl" />
+            <div className="bg-yellow-100 p-4 rounded-xl">
+              <FaClock className="text-yellow-600 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm text-gray-500">Missing Documents</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.missingDocuments || 0}</p>
+              <p className="text-sm text-gray-500 font-medium">Missing Documents</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.missingDocuments || 0}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow-xl rounded-2xl p-6 border border-green-50 hover:shadow-2xl transition-all duration-300">
           <div className="flex items-center">
-            <div className="bg-green-100 p-3 rounded-full">
-              <FaCheckCircle className="text-green-600 text-xl" />
+            <div className="bg-green-100 p-4 rounded-xl">
+              <FaCheckCircle className="text-green-600 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm text-gray-500">Approved</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
+              <p className="text-sm text-gray-500 font-medium">Approved</p>
+              <p className="text-3xl font-bold text-green-600 mt-2">
                 {stats?.byStatus?.find(s => s._id === 'Approved')?.count || 0}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow-xl rounded-2xl p-6 border border-red-50 hover:shadow-2xl transition-all duration-300">
           <div className="flex items-center">
-            <div className="bg-red-100 p-3 rounded-full">
-              <FaTimesCircle className="text-red-600 text-xl" />
+            <div className="bg-red-100 p-4 rounded-xl">
+              <FaTimesCircle className="text-red-600 text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm text-gray-500">Rejected</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
+              <p className="text-sm text-gray-500 font-medium">Rejected</p>
+              <p className="text-3xl font-bold text-red-600 mt-2">
                 {stats?.byStatus?.find(s => s._id === 'Rejected')?.count || 0}
               </p>
             </div>
@@ -132,79 +148,94 @@ const DashboardPage = () => {
       </div>
 
       {/* Status distribution */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Applications by Status</h2>
+      <div className="bg-white shadow-xl rounded-2xl p-6 border border-primary-50">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+            <FaClipboardList className="mr-2 text-primary-500" />
+            Applications by Status
+          </h2>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {['Draft', 'Submitted', 'Under Review', 'Queried', 'Approved', 'Rejected'].map((status) => (
-            <div key={status} className="text-center">
-              <div className="flex justify-center mb-2">
+          {['Draft', 'Submitted', 'Under Review', 'Queried', 'Approved', 'Rejected'].map((status) => {
+            const count = stats?.byStatus?.find(s => s._id === status)?.count || 0;
+            return (
+              <div key={status} className="text-center">
+                <div className="flex justify-center mb-3">
+                  <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${statusGradientColors[status]} flex items-center justify-center shadow-lg`}>
+                    <span className="text-2xl font-bold text-gray-800">{count}</span>
+                  </div>
+                </div>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[status]}`}>
                   {statusIcons[status]}
-                  <span className="ml-2">{status}</span>
+                  <span className="ml-2 font-medium">{status}</span>
                 </span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {stats?.byStatus?.find(s => s._id === status)?.count || 0}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Recent applications */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
-          <Link 
+      <div className="bg-white shadow-xl rounded-2xl p-6 border border-primary-50">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+            <FaUsers className="mr-2 text-primary-500" />
+            Recent Applications
+          </h2>
+          <Link
             to="/applications"
-            className="text-sm font-medium text-primary-600 hover:text-primary-500"
+            className="text-sm font-medium text-primary-600 hover:text-primary-500 flex items-center transition-colors duration-200"
           >
-            View all applications
+            View all applications <span className="ml-1">→</span>
           </Link>
         </div>
 
         {recentApplications.length === 0 ? (
-          <div className="text-center py-8">
-            <FaFileAlt className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-gray-500">No recent applications</p>
+          <div className="text-center py-12">
+            <div className="mx-auto h-20 w-20 bg-primary-100 rounded-full flex items-center justify-center mb-4">
+              <FaFileAlt className="h-10 w-10 text-primary-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No recent applications</h3>
+            <p className="text-gray-500">Get started by creating your first visa application</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Applicant
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Visa Type
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {recentApplications.map((app) => (
-                  <tr key={app._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Link to={`/applications/${app._id}`} className="text-primary-600 hover:text-primary-900">
+                  <tr key={app._id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <Link to={`/applications/${app._id}`} className="text-primary-600 hover:text-primary-900 font-medium transition-colors duration-200">
                         {app.applicantName}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{app.visaType}</div>
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 font-medium">{app.visaType}</div>
+                      <div className="text-xs text-gray-500">{app.referenceNumber}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[app.status]}`}>
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusColors[app.status]} shadow-sm`}>
                         {statusIcons[app.status]}
-                        <span className="ml-1">{app.status}</span>
+                        <span className="ml-2 font-medium">{app.status}</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500">
                       {new Date(app.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
