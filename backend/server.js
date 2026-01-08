@@ -33,11 +33,13 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const applicationRoutes = require('./routes/applications');
 const documentRoutes = require('./routes/documents');
+const publicRoutes = require('./routes/public');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/public', publicRoutes); // Public API endpoints for website integration
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {

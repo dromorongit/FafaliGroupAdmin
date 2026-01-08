@@ -1,0 +1,44 @@
+const express = require('express');
+const router = express.Router();
+const publicController = require('../controllers/publicController');
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer for document uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/applicant-documents/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Public API endpoints for website integration
+// These endpoints are accessible without authentication
+
+/**
+ * @route POST /api/public/applications
+ * @desc Create a new visa application from the public website
+ * @access Public
+ */
+router.post('/applications', publicController.createPublicApplication);
+
+/**
+ * @route GET /api/public/applications/status
+ * @desc Check application status (for applicants)
+ * @access Public
+ */
+router.get('/applications/status', publicController.checkApplicationStatus);
+
+/**
+ * @route POST /api/public/documents/upload
+ * @desc Upload document for an application (for applicants)
+ * @access Public
+ */
+router.post('/documents/upload', upload.single('document'), publicController.uploadApplicantDocument);
+
+module.exports = router;
