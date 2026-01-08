@@ -19,8 +19,11 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Database connection with retry logic
-  const connectDB = async () => {
+const connectDB = async () => {
   try {
+    console.log('Attempting to connect to MongoDB...');
+    console.log('MongoDB URI:', process.env.MONGODB_URI ? '***configured***' : 'NOT SET');
+    
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -28,7 +31,7 @@ if (!fs.existsSync(uploadDir)) {
       socketTimeoutMS: 45000,
       serverSelectionTimeoutMS: 30000
     });
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB successfully');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
     console.log('Retrying connection in 5 seconds...');

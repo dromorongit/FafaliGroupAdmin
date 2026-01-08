@@ -11,8 +11,12 @@
       "env": {
         "NODE_ENV": "production"
       },
-      "mountDir": ".",
-      "rootDir": "."
+      "domains": ["fafali-visa-admin.up.railway.app"]
     }
-  ]
+  ],
+  "database": {
+    "mongodb": {
+      "name": "fafali-mongo"
+    }
+  }
 }
