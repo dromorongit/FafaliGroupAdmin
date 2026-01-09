@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import ApplicationDetailPage from './pages/ApplicationDetailPage';
+import BookingsPage from './pages/BookingsPage';
 import UsersPage from './pages/UsersPage';
 import DocumentsPage from './pages/DocumentsPage';
 import Layout from './components/Layout';
@@ -28,6 +29,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/applications" element={<ApplicationsPage />} />
           <Route path="/applications/:id" element={<ApplicationDetailPage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/documents/:applicationId" element={<DocumentsPage />} />
           <Route path="" element={<Navigate to="/dashboard" replace />} />

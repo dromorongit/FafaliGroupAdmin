@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaHome, FaUsers, FaFileAlt, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaUsers, FaFileAlt, FaCalendar, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
 
 const Layout = () => {
   const { user, logout, hasRole } = useAuth();
@@ -16,6 +16,7 @@ const Layout = () => {
   const navItems = [
     { name: 'Dashboard', icon: <FaHome />, path: '/dashboard' },
     { name: 'Applications', icon: <FaFileAlt />, path: '/applications' },
+    { name: 'Bookings', icon: <FaCalendar />, path: '/bookings' },
     ...(hasRole('super_admin') ? [{ name: 'Users', icon: <FaUsers />, path: '/users' }] : [])
   ];
 

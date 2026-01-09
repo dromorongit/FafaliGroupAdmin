@@ -1,4 +1,5 @@
 const Application = require('../models/Application');
+const Booking = require('../models/Booking');
 const Document = require('../models/Document');
 const AuditLog = require('../models/AuditLog');
 const { sendEmail, sendApplicationNotification } = require('../utils/email');
@@ -294,10 +295,166 @@ const publicController = {
     } catch (err) {
       res.status(500).json({ message: 'Failed to upload document' });
     }
+  },
+  
+  // Public endpoint to check booking status
+  checkBookingStatus: async (req, res) => {
+    try {
+      const { referenceNumber, email } = req.query;
+      
+      if (!referenceNumber || !email) {
+        return res.status(400).json({ 
+          message: 'Reference number and email are required'
+        });
+      }
+      
+      // Find booking by reference number and email
+      const booking = await Booking.findOne({ 
+        referenceNumber, 
+        customerEmail: email 
+      }).select('-comments -internalNotes');
+      
+      if (!booking) {
+        return res.status(404).json({ 
+          message: 'Booking not found. Please check your reference number and email.'
+        });
+      }
+      
+      res.json({
+        success: true,
+        booking: {
+          referenceNumber: booking.referenceNumber,
+          customerName: booking.customerName,
+          tourName: booking.tourName,
+          tourPackage: booking.tourPackage,
+          departureDate: booking.departureDate,
+          numberOfTravelers: booking.numberOfTravelers,
+          totalAmount: booking.totalAmount,
+          status: booking.status,
+          paymentStatus: booking.paymentStatus,
+          createdAt: booking.createdAt,
+          updatedAt: booking.updatedAt,
+          // Include status-specific messages
+          statusMessage: getBookingStatusMessage(booking.status)
+        }
+      });
+      
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to check booking status' });
+    }
+  },
+  
+  // Public endpoint for website tour bookings
+  createPublicBooking: async (req, res) => {
+    try {
+      // Handle case where body might be stringified incorrectly
+      let bodyData = req.body;
+      
+      if (typeof bodyData === 'string') {
+        try {
+          let fixedJson = bodyData.replace(/'/g, '"');
+          bodyData = JSON.parse(fixedJson);
+        } catch (parseErr) {
+          try {
+            const keyRegex = /([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g;
+            let fixedJson2 = bodyData.replace(keyRegex, '$1"$2":');
+            bodyData = JSON.parse(fixedJson2);
+          } catch (finalErr) {
+            return res.status(400).json({
+              message: 'Invalid JSON format. Please ensure your request uses valid JSON with double quotes around all keys and string values.',
+              example: '{"customerName":"John Doe","customerEmail":"john@example.com","tourName":"Safari Tour","numberOfTravelers":2}'
+            });
+          }
+        }
+      }
+      
+      const { 
+        customerName, 
+        customerEmail, 
+        customerPhone, 
+        tourName, 
+        tourPackage,
+        departureDate, 
+        returnDate, 
+        numberOfTravelers, 
+        totalAmount,
+        specialRequests
+      } = bodyData;
+      
+      // Validate required fields
+      if (!customerName || !customerEmail || !tourName) {
+        return res.status(400).json({
+          message: 'Missing required fields: customerName, customerEmail, and tourName are required',
+          received: { customerName, customerEmail, tourName }
+        });
+      }
+      
+      // Create new booking
+      const newBooking = new Booking({
+        customerName,
+        customerEmail,
+        customerPhone: customerPhone || '',
+        tourName,
+        tourPackage: tourPackage || '',
+        departureDate,
+        returnDate,
+        numberOfTravelers: numberOfTravelers || 1,
+        totalAmount: totalAmount || 0,
+        specialRequests: specialRequests || '',
+        status: 'Pending',
+        paymentStatus: 'pending',
+        source: 'website',
+        referenceNumber: `BK-${Date.now().toString().slice(-6)}`
+      });
+      
+      const savedBooking = await newBooking.save();
+      
+      // Log the creation
+      await AuditLog.create({
+        action: 'Booking Created',
+        entityType: 'Booking',
+        entityId: savedBooking._id,
+        performedBy: 'Public Website',
+        details: `New booking created from website: ${customerName} - ${tourName}`
+      });
+      
+      // Send confirmation email
+      try {
+        await sendEmail(
+          customerEmail,
+          `Tour Booking Received - ${savedBooking.referenceNumber}`,
+          `Dear ${customerName},<br><br>` +
+          `Thank you for booking with Fafali Group. Your tour booking has been received.<br><br>` +
+          `Reference Number: ${savedBooking.referenceNumber}<br>` +
+          `Tour: ${tourName}<br>` +
+          `Status: Pending<br><br>` +
+          `Our team will contact you shortly to confirm your booking and payment details.<br><br>` +
+          `Best regards,<br>` +
+          `Fafali Group Tours`
+        );
+      } catch (emailError) {
+        console.error('Failed to send booking confirmation email:', emailError.message);
+      }
+      
+      res.status(201).json({
+        success: true,
+        message: 'Booking submitted successfully',
+        booking: {
+          id: savedBooking._id,
+          referenceNumber: savedBooking.referenceNumber,
+          status: savedBooking.status,
+          createdAt: savedBooking.createdAt
+        }
+      });
+      
+    } catch (err) {
+      console.error('Error creating public booking:', err.message);
+      res.status(500).json({ message: 'Failed to submit booking' });
+    }
   }
 };
 
-// Helper function for status messages
+// Helper function for application status messages
 function getStatusMessage(status) {
   const messages = {
     'Draft': 'Your application is being prepared. Please complete all required information.',
@@ -309,6 +466,19 @@ function getStatusMessage(status) {
   };
   
   return messages[status] || 'Your application is being processed.';
+}
+
+// Helper function for booking status messages
+function getBookingStatusMessage(status) {
+  const messages = {
+    'Pending': 'Your booking is awaiting confirmation from our team.',
+    'Confirmed': 'Your booking has been confirmed! We look forward to hosting you.',
+    'In Progress': 'Your tour is currently in progress. Enjoy your trip!',
+    'Completed': 'Your tour has been completed. Thank you for traveling with us!',
+    'Cancelled': 'Your booking has been cancelled. Contact us for any refunds or rebooking.'
+  };
+  
+  return messages[status] || 'Your booking is being processed.';
 }
 
 module.exports = publicController;

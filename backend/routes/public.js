@@ -41,4 +41,18 @@ router.get('/applications/status', publicController.checkApplicationStatus);
  */
 router.post('/documents/upload', upload.single('document'), publicController.uploadApplicantDocument);
 
+/**
+ * @route GET /api/public/bookings/status
+ * @desc Check booking status (for customers)
+ * @access Public
+ */
+router.get('/bookings/status', publicController.checkBookingStatus);
+
+/**
+ * @route POST /api/public/bookings
+ * @desc Create a new tour booking from the public website
+ * @access Public
+ */
+router.post('/bookings', publicController.createPublicBooking);
+
 module.exports = router;

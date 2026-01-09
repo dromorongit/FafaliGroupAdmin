@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { FaPlus, FaSearch, FaFileAlt, FaCheckCircle, FaTimesCircle, FaClock, FaQuestionCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaFileAlt, FaCheckCircle, FaTimesCircle, FaClock, FaQuestionCircle, FaExclamationCircle, FaTrash, FaCheck } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const ApplicationsPage = () => {
@@ -11,6 +11,8 @@ const ApplicationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedApplications, setSelectedApplications] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [newApplication, setNewApplication] = useState({
     applicantName: '',
     applicantEmail: '',
@@ -50,6 +52,64 @@ const ApplicationsPage = () => {
       fetchApplications();
     } catch (err) {
       toast.error('Failed to create application');
+    }
+  };
+
+  const handleDeleteApplication = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this application?')) {
+      return;
+    }
+    
+    try {
+      setIsDeleting(true);
+      await api.delete(`/applications/${id}`);
+      toast.success('Application deleted successfully');
+      fetchApplications();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete application');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedApplications.length === 0) {
+      toast.error('No applications selected');
+      return;
+    }
+    
+    if (!window.confirm(`Are you sure you want to delete ${selectedApplications.length} application(s)?`)) {
+      return;
+    }
+    
+    try {
+      setIsDeleting(true);
+      await api.delete('/applications/bulk/delete', {
+        data: { applicationIds: selectedApplications }
+      });
+      toast.success(`${selectedApplications.length} application(s) deleted successfully`);
+      setSelectedApplications([]);
+      fetchApplications();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete applications');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedApplications.length === filteredApplications.length) {
+      setSelectedApplications([]);
+    } else {
+      setSelectedApplications(filteredApplications.map(app => app._id));
+    }
+  };
+
+  const toggleSelectApplication = (id) => {
+    if (selectedApplications.includes(id)) {
+      setSelectedApplications(selectedApplications.filter(appId => appId !== id));
+    } else {
+      setSelectedApplications([...selectedApplications, id]);
     }
   };
 
@@ -111,6 +171,16 @@ const ApplicationsPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Visa Applications</h1>
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          {selectedApplications.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              disabled={isDeleting}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+            >
+              <FaTrash className="mr-2" />
+              Delete Selected ({selectedApplications.length})
+            </button>
+          )}
           <button
             onClick={() => setShowCreateModal(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -185,6 +255,16 @@ const ApplicationsPage = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedApplications.length === filteredApplications.length && filteredApplications.length > 0}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+                      />
+                    </div>
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Applicant
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -208,6 +288,16 @@ const ApplicationsPage = () => {
                 {filteredApplications.map((app) => (
                   <tr key={app._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedApplications.includes(app._id)}
+                          onChange={() => toggleSelectApplication(app._id)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{app.applicantName}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -226,12 +316,22 @@ const ApplicationsPage = () => {
                       {new Date(app.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link 
-                        to={`/applications/${app._id}`}
-                        className="text-primary-600 hover:text-primary-900"
-                      >
-                        View Details
-                      </Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link 
+                          to={`/applications/${app._id}`}
+                          className="text-primary-600 hover:text-primary-900"
+                        >
+                          View Details
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteApplication(app._id)}
+                          disabled={isDeleting}
+                          className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          title="Delete Application"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

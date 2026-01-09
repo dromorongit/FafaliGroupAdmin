@@ -43,4 +43,14 @@ router.post('/:id/comments', auth(), applicationController.addComment);
 // @access  Private
 router.post('/:id/notes', auth(), applicationController.addInternalNote);
 
+// @route   DELETE /api/applications/:id
+// @desc    Delete single application
+// @access  Private (Admin or Owner)
+router.delete('/:id', auth(), applicationController.deleteApplication);
+
+// @route   DELETE /api/applications/bulk-delete
+// @desc    Bulk delete applications
+// @access  Private (Admin or Owner)
+router.delete('/bulk/delete', auth(), applicationController.bulkDeleteApplications);
+
 module.exports = router;

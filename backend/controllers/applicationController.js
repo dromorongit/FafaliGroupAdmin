@@ -220,6 +220,67 @@ const applicationController = {
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
+  },
+  
+  // Delete single application
+  deleteApplication: async (req, res) => {
+    try {
+      const application = await Application.findById(req.params.id);
+      
+      if (!application) {
+        return res.status(404).json({ message: 'Application not found' });
+      }
+      
+      // Check if user has access (admin or createdBy)
+      if (req.user.role !== 'admin' && application.createdBy?.toString() !== req.user.id) {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+      
+      // Delete associated documents
+      await Document.deleteMany({ applicationId: req.params.id });
+      
+      await Application.findByIdAndDelete(req.params.id);
+      res.json({ message: 'Application deleted successfully' });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  },
+  
+  // Bulk delete applications
+  bulkDeleteApplications: async (req, res) => {
+    try {
+      const { applicationIds } = req.body;
+      
+      if (!applicationIds || !Array.isArray(applicationIds) || applicationIds.length === 0) {
+        return res.status(400).json({ message: 'No applications selected for deletion' });
+      }
+      
+      // For non-admin users, only delete their own applications
+      let query = { _id: { $in: applicationIds } };
+      if (req.user.role !== 'admin') {
+        query.createdBy = req.user.id;
+      }
+      
+      // Get applications to delete
+      const applicationsToDelete = await Application.find(query);
+      
+      if (applicationsToDelete.length === 0) {
+        return res.status(404).json({ message: 'No applications found for deletion' });
+      }
+      
+      // Delete associated documents
+      await Document.deleteMany({ applicationId: { $in: applicationIds } });
+      
+      // Delete applications
+      await Application.deleteMany({ _id: { $in: applicationIds } });
+      
+      res.json({ 
+        message: `${applicationsToDelete.length} application(s) deleted successfully`,
+        deletedCount: applicationsToDelete.length
+      });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
 };
 
