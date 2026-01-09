@@ -35,18 +35,29 @@ app.use((req, res, next) => {
   console.log('Headers:', {
     'Origin': req.headers.origin,
     'Content-Type': req.headers['content-type'],
+    'Content-Length': req.headers['content-length'],
     'User-Agent': req.headers['user-agent']
   });
   
+  // Log raw body for POST requests
   if (req.method === 'POST' && req.path.includes('applications')) {
-    console.log('Request body preview:', req.body ? Object.keys(req.body) : 'No body');
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      console.log('Raw request body:', body);
+      console.log('Parsed body:', req.body);
+      next();
+    });
+    return;
   }
   
   next();
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb', strict: false }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, process.env.UPLOAD_DIR || 'uploads');
@@ -102,8 +113,27 @@ if (process.env.NODE_ENV === 'production') {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error('Detailed error:', {
+    message: err.message,
+    stack: err.stack,
+    name: err.name,
+    type: err.type,
+    path: req.path,
+    method: req.method
+  });
+  
+  // Provide more detailed error in development
+  const errorResponse = {
+    message: 'Something went wrong!',
+    timestamp: new Date().toISOString()
+  };
+  
+  if (process.env.NODE_ENV === 'development') {
+    errorResponse.error = err.message;
+    errorResponse.stack = err.stack;
+  }
+  
+  res.status(500).json(errorResponse);
 });
 
 const PORT = process.env.PORT || 5000;

@@ -103,9 +103,16 @@ const publicController = {
       });
       
     } catch (err) {
-      console.error('Error creating public application:', err);
+      console.error('Error creating public application:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+        code: err.code,
+        requestBody: req.body,
+        requestHeaders: req.headers
+      });
       
-      // Enhanced error response with more details
+      // Enhanced error response
       const errorResponse = {
         message: 'Failed to submit application',
         error: err.message,
@@ -113,13 +120,16 @@ const publicController = {
         timestamp: new Date().toISOString()
       };
       
-      // Add specific error information for common issues
+      // Add specific error information
       if (err.name === 'ValidationError') {
         errorResponse.validationErrors = err.errors;
       } else if (err.code === 11000) {
         errorResponse.duplicateError = true;
       } else if (err.message.includes('ECONNREFUSED')) {
         errorResponse.networkError = true;
+      } else if (err.type === 'entity.parse.failed') {
+        errorResponse.bodyParseError = true;
+        errorResponse.receivedBody = req.body;
       }
       
       res.status(500).json(errorResponse);
