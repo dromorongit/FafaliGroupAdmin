@@ -28,6 +28,23 @@ app.use((req, res, next) => {
   
   next();
 });
+
+// Debugging middleware to log incoming requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Headers:', {
+    'Origin': req.headers.origin,
+    'Content-Type': req.headers['content-type'],
+    'User-Agent': req.headers['user-agent']
+  });
+  
+  if (req.method === 'POST' && req.path.includes('applications')) {
+    console.log('Request body preview:', req.body ? Object.keys(req.body) : 'No body');
+  }
+  
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

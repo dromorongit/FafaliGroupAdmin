@@ -104,11 +104,25 @@ const publicController = {
       
     } catch (err) {
       console.error('Error creating public application:', err);
-      res.status(500).json({
+      
+      // Enhanced error response with more details
+      const errorResponse = {
         message: 'Failed to submit application',
         error: err.message,
-        details: 'Admin system connection failed'
-      });
+        details: 'Admin system connection failed',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Add specific error information for common issues
+      if (err.name === 'ValidationError') {
+        errorResponse.validationErrors = err.errors;
+      } else if (err.code === 11000) {
+        errorResponse.duplicateError = true;
+      } else if (err.message.includes('ECONNREFUSED')) {
+        errorResponse.networkError = true;
+      }
+      
+      res.status(500).json(errorResponse);
     }
   },
   
