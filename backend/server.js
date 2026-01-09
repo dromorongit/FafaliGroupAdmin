@@ -42,7 +42,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '10mb', strict: false }));
+// Body parser configuration with enhanced error handling
+app.use(express.json({
+  limit: '10mb',
+  strict: false,
+  verify: (req, res, buf) => {
+    try {
+      if (buf.length > 0) {
+        JSON.parse(buf.toString());
+      }
+    } catch (err) {
+      console.error('Invalid JSON received:', buf.toString());
+    }
+  }
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Create uploads directory if it doesn't exist

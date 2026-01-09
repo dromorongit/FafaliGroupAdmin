@@ -20,10 +20,19 @@ const publicController = {
         additionalInfo 
       } = req.body;
       
+      // Validate JSON parsing
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({
+          message: 'Request body is empty or invalid',
+          received: req.body
+        });
+      }
+      
       // Validate required fields
       if (!applicantName || !email || !visaType || !travelPurpose) {
-        return res.status(400).json({ 
-          message: 'Missing required fields: applicantName, email, visaType, travelPurpose are required'
+        return res.status(400).json({
+          message: 'Missing required fields: applicantName, email, visaType, travelPurpose are required',
+          received: req.body
         });
       }
       
