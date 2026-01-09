@@ -8,6 +8,38 @@ const publicController = {
   // Public endpoint for website visa applications
   createPublicApplication: async (req, res) => {
     try {
+      // Log raw body for debugging
+      console.log('Raw request body:', req.body);
+      
+      // Handle case where body might be stringified incorrectly
+      let bodyData = req.body;
+      
+      // If body is a string (malformed JSON), try to parse it
+      if (typeof bodyData === 'string') {
+        console.log('Body is string, attempting to parse...');
+        try {
+          // Try to fix common JSON errors: single quotes to double quotes
+          let fixedJson = bodyData.replace(/'/g, '"');
+          bodyData = JSON.parse(fixedJson);
+          console.log('Successfully parsed fixed JSON');
+        } catch (parseErr) {
+          // If that fails, try a more aggressive fix
+          try {
+            // Add quotes around keys if missing
+            const keyRegex = /([{,])\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g;
+            let fixedJson2 = bodyData.replace(keyRegex, '$1"$2":');
+            bodyData = JSON.parse(fixedJson2);
+            console.log('Successfully parsed aggressively fixed JSON');
+          } catch (finalErr) {
+            return res.status(400).json({
+              message: 'Invalid JSON format. Please ensure your request uses valid JSON with double quotes around all keys and string values.',
+              example: '{"applicantName":"John Doe","email":"john@example.com","visaType":"Tourist Visa","travelPurpose":"Tourism"}',
+              received: bodyData.substring(0, 100)
+            });
+          }
+        }
+      }
+      
       const { 
         applicantName, 
         email, 
@@ -18,21 +50,18 @@ const publicController = {
         travelDate, 
         returnDate, 
         additionalInfo 
-      } = req.body;
-      
-      // Validate JSON parsing
-      if (!req.body || Object.keys(req.body).length === 0) {
-        return res.status(400).json({
-          message: 'Request body is empty or invalid',
-          received: req.body
-        });
-      }
+      } = bodyData;
       
       // Validate required fields
       if (!applicantName || !email || !visaType || !travelPurpose) {
         return res.status(400).json({
           message: 'Missing required fields: applicantName, email, visaType, travelPurpose are required',
-          received: req.body
+          received: {
+            applicantName,
+            email,
+            visaType,
+            travelPurpose
+          }
         });
       }
       
