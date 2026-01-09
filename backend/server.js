@@ -37,7 +37,7 @@ function fixMalformedJson(body) {
 
 // Middleware
 app.use(cors({
-  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org', 'https://dromorongit.github.io/Fafali-Group/', 'http://localhost:3000', 'http://localhost:5000'],
+  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org', 'https://dromorongit.github.io', 'https://dromorongit.github.io/Fafali-Group/', 'http://localhost:3000', 'http://localhost:5000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
