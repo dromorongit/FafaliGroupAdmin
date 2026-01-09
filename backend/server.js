@@ -57,25 +57,29 @@ app.use((req, res, next) => {
   next();
 });
 
-// Raw body parser for JSON handling
+// Capture raw body for JSON parsing
 app.use(express.json({
   limit: '10mb',
   strict: false,
   verify: (req, res, buf) => {
     const rawBody = buf.toString();
-    // Try to parse and fix malformed JSON
+    req.rawBody = rawBody;
+    
+    // Try to fix malformed JSON
     const fixedBody = fixMalformedJson(rawBody);
-    if (fixedBody !== rawBody) {
-      console.log('Fixed malformed JSON:', fixedBody);
-      req.body = fixedBody;
+    
+    if (fixedBody !== rawBody && typeof fixedBody === 'object') {
+      console.log('Successfully fixed malformed JSON');
+      // Store fixed body to use instead
+      req.fixedBody = fixedBody;
     }
   }
 }));
 
-// Fallback body parser for already-parsed bodies
+// Custom JSON body parser that uses fixed body if available
 app.use((req, res, next) => {
-  if (req.rawBody) {
-    req.body = fixMalformedJson(req.rawBody);
+  if (req.fixedBody) {
+    req.body = req.fixedBody;
   }
   next();
 });
@@ -138,15 +142,18 @@ if (process.env.NODE_ENV === 'production') {
 app.use((err, req, res, next) => {
   // Handle JSON parse errors specifically
   if (err.type === 'entity.parse.failed') {
+    // Get raw body from verify middleware or try to fix it
+    const rawBody = req.rawBody || err.body;
+    
     // Try to fix the malformed JSON
-    const rawBody = err.body;
     const fixedBody = fixMalformedJson(rawBody);
     
     if (typeof fixedBody === 'object') {
-      // Successfully fixed - retry with fixed body
+      // Successfully fixed - use the fixed body
       req.body = fixedBody;
-      // Re-parse the route handler
-      return require('./routes/public')(req, res, next);
+      console.log('Recovered from JSON parse error using fixed body');
+      // Continue to next middleware/route
+      return next();
     }
     
     // Return error with helpful message
