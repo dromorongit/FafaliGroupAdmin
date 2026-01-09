@@ -15,7 +15,7 @@ const auditLogSchema = new mongoose.Schema({
     required: true
   },
   performedBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed, // Accepts both ObjectId and string
     ref: 'User',
     required: true
   },
