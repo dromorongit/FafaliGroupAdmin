@@ -39,20 +39,6 @@ app.use((req, res, next) => {
     'User-Agent': req.headers['user-agent']
   });
   
-  // Log raw body for POST requests
-  if (req.method === 'POST' && req.path.includes('applications')) {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      console.log('Raw request body:', body);
-      console.log('Parsed body:', req.body);
-      next();
-    });
-    return;
-  }
-  
   next();
 });
 
