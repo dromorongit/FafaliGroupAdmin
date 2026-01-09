@@ -146,6 +146,7 @@ const publicController = {
       }
       
       res.status(201).json({
+        success: true,
         message: 'Application submitted successfully',
         application: {
           id: savedApplication._id,
