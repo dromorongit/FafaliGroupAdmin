@@ -9,10 +9,25 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org', 'https://dromorongit.github.io/Fafali-Group/'],
+  origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org', 'https://dromorongit.github.io/Fafali-Group/', 'http://localhost:3000', 'http://localhost:5000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+// Add CORS error handling middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

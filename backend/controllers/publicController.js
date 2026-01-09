@@ -104,7 +104,11 @@ const publicController = {
       
     } catch (err) {
       console.error('Error creating public application:', err);
-      res.status(500).json({ message: 'Failed to submit application' });
+      res.status(500).json({
+        message: 'Failed to submit application',
+        error: err.message,
+        details: 'Admin system connection failed'
+      });
     }
   },
   
