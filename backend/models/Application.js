@@ -11,7 +11,8 @@ const applicationSchema = new mongoose.Schema({
   },
   applicantPhone: {
     type: String,
-    required: true
+    required: false, // Optional for public submissions
+    default: ''
   },
   visaType: {
     type: String,
@@ -28,12 +29,22 @@ const applicationSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['Draft', 'Submitted', 'Under Review', 'Queried', 'Approved', 'Rejected'],
-    default: 'Draft'
+    default: 'Submitted'
+  },
+  source: {
+    type: String,
+    enum: ['website', 'admin'],
+    default: 'website'
+  },
+  referenceNumber: {
+    type: String,
+    unique: true
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false, // Not required for public website submissions
+    default: null
   },
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,

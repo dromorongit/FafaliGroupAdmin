@@ -52,13 +52,17 @@ const publicController = {
         additionalInfo 
       } = bodyData;
       
+      // Map email to applicantEmail (support both field names)
+      const applicantEmail = email;
+      const applicantPhone = phone || '';
+      
       // Validate required fields
-      if (!applicantName || !email || !visaType || !travelPurpose) {
+      if (!applicantName || !applicantEmail || !visaType || !travelPurpose) {
         return res.status(400).json({
           message: 'Missing required fields: applicantName, email, visaType, travelPurpose are required',
           received: {
             applicantName,
-            email,
+            applicantEmail,
             visaType,
             travelPurpose
           }
@@ -68,8 +72,8 @@ const publicController = {
       // Create new application with "Submitted" status
       const newApplication = new Application({
         applicantName,
-        email,
-        phone,
+        applicantEmail,
+        applicantPhone,
         passportNumber,
         visaType,
         travelPurpose,
@@ -96,7 +100,7 @@ const publicController = {
       // Send confirmation email to applicant
       try {
         await sendEmailNotification(
-          email,
+          applicantEmail,
           'Visa Application Received',
           `Dear ${applicantName},\n\n` +
           `Thank you for applying for a visa with Fafali Group. Your application has been received.\n\n` +
@@ -120,7 +124,7 @@ const publicController = {
           `New Visa Application: ${savedApplication.referenceNumber}`,
           `A new visa application has been submitted:\n\n` +
           `Applicant: ${applicantName}\n` +
-          `Email: ${email}\n` +
+          `Email: ${applicantEmail}\n` +
           `Visa Type: ${visaType}\n` +
           `Reference: ${savedApplication.referenceNumber}\n` +
           `Date: ${new Date().toLocaleString()}\n\n` +
@@ -185,10 +189,10 @@ const publicController = {
         });
       }
       
-      // Find application by reference number and email
+      // Find application by reference number and email (using applicantEmail field)
       const application = await Application.findOne({ 
         referenceNumber, 
-        email 
+        applicantEmail: email 
       }).select('-documents -internalNotes');
       
       if (!application) {
@@ -227,10 +231,10 @@ const publicController = {
         });
       }
       
-      // Find the application
+      // Find the application using applicantEmail field
       const application = await Application.findOne({ 
         referenceNumber, 
-        email 
+        applicantEmail: email 
       });
       
       if (!application) {
