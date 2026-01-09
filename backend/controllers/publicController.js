@@ -1,7 +1,7 @@
 const Application = require('../models/Application');
 const Document = require('../models/Document');
 const AuditLog = require('../models/AuditLog');
-const { sendEmailNotification } = require('../utils/email');
+const { sendEmail, sendApplicationNotification } = require('../utils/email');
 
 const publicController = {
   
@@ -111,17 +111,16 @@ const publicController = {
       
       // Send confirmation email to applicant
       try {
-        await sendEmailNotification(
+        await sendEmail(
           applicantEmail,
-          'Visa Application Received',
-          `Dear ${applicantName},\n\n` +
-          `Thank you for applying for a visa with Fafali Group. Your application has been received.\n\n` +
-          `Reference Number: ${savedApplication.referenceNumber}\n` +
-          `Visa Type: ${visaType}\n` +
-          `Status: Submitted\n\n` +
-          `Our team will review your application and contact you if additional information is needed.\n\n` +
-          `You can check your application status on our website using your reference number.\n\n` +
-          `Best regards,\n` +
+          `Visa Application Received - ${savedApplication.referenceNumber}`,
+          `Dear ${applicantName},<br><br>` +
+          `Thank you for applying for a visa with Fafali Group. Your application has been received.<br><br>` +
+          `Reference Number: ${savedApplication.referenceNumber}<br>` +
+          `Visa Type: ${visaType}<br>` +
+          `Status: Submitted<br><br>` +
+          `Our team will review your application and contact you if additional information is needed.<br><br>` +
+          `Best regards,<br>` +
           `Fafali Group Visa Services`
         );
       } catch (emailError) {
@@ -131,15 +130,15 @@ const publicController = {
       // Send notification to admin
       try {
         const adminEmail = process.env.ADMIN_EMAIL || 'visas@fafaligroup.org';
-        await sendEmailNotification(
+        await sendEmail(
           adminEmail,
           `New Visa Application: ${savedApplication.referenceNumber}`,
-          `A new visa application has been submitted:\n\n` +
-          `Applicant: ${applicantName}\n` +
-          `Email: ${applicantEmail}\n` +
-          `Visa Type: ${visaType}\n` +
-          `Reference: ${savedApplication.referenceNumber}\n` +
-          `Date: ${new Date().toLocaleString()}\n\n` +
+          `A new visa application has been submitted:<br><br>` +
+          `Applicant: ${applicantName}<br>` +
+          `Email: ${applicantEmail}<br>` +
+          `Visa Type: ${visaType}<br>` +
+          `Reference: ${savedApplication.referenceNumber}<br>` +
+          `Date: ${new Date().toLocaleString()}<br><br>` +
           `Login to the admin system to process this application.`
         );
       } catch (adminEmailError) {
