@@ -11,7 +11,7 @@ const applicationSchema = new mongoose.Schema({
   },
   applicantPhone: {
     type: String,
-    required: false, // Optional for public submissions
+    required: false,
     default: ''
   },
   visaType: {
@@ -21,6 +21,26 @@ const applicationSchema = new mongoose.Schema({
   travelPurpose: {
     type: String,
     required: true
+  },
+  destination: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  duration: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  userId: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid'],
+    default: 'pending'
   },
   travelDates: {
     from: Date,
@@ -43,7 +63,7 @@ const applicationSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: false, // Not required for public website submissions
+    required: false,
     default: null
   },
   assignedTo: {

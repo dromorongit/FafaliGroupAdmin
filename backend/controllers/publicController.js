@@ -49,7 +49,12 @@ const publicController = {
         travelPurpose, 
         travelDate, 
         returnDate, 
-        additionalInfo 
+        additionalInfo,
+        destination,
+        duration,
+        userId,
+        paymentStatus,
+        status: incomingStatus
       } = bodyData;
       
       // Map email to applicantEmail (support both field names)
@@ -69,7 +74,10 @@ const publicController = {
         });
       }
       
-      // Create new application with "Submitted" status
+      // Determine status (use incoming status if provided, otherwise default to 'Submitted')
+      const applicationStatus = incomingStatus || 'Submitted';
+      
+      // Create new application
       const newApplication = new Application({
         applicantName,
         applicantEmail,
@@ -77,10 +85,14 @@ const publicController = {
         passportNumber,
         visaType,
         travelPurpose,
+        destination: destination || '',
+        duration: duration || '',
+        userId: userId || '',
+        paymentStatus: paymentStatus || 'pending',
         travelDate,
         returnDate,
         additionalInfo,
-        status: 'Submitted',
+        status: applicationStatus,
         source: 'website', // Mark as coming from public website
         referenceNumber: `FAF-${Date.now().toString().slice(-6)}`
       });
