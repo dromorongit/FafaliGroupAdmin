@@ -7,6 +7,34 @@ const fs = require('fs');
 
 const app = express();
 
+// Helper function to fix malformed JSON
+function fixMalformedJson(body) {
+  if (typeof body !== 'string') return body;
+  
+  try {
+    // First try to parse as-is
+    return JSON.parse(body);
+  } catch (e) {
+    // Fix single quotes to double quotes
+    let fixed = body.replace(/'/g, '"');
+    
+    // Try parsing again
+    try {
+      return JSON.parse(fixed);
+    } catch (e2) {
+      // Add quotes around keys if missing
+      fixed = fixed.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)(\s*:)/g, '$1"$2"$3');
+      
+      try {
+        return JSON.parse(fixed);
+      } catch (e3) {
+        // Return original if we can't fix it
+        return body;
+      }
+    }
+  }
+}
+
 // Middleware
 app.use(cors({
   origin: ['https://www.fafaligroup.org', 'https://fafaligroup.org', 'https://dromorongit.github.io/Fafali-Group/', 'http://localhost:3000', 'http://localhost:5000'],
@@ -29,33 +57,29 @@ app.use((req, res, next) => {
   next();
 });
 
-// Debugging middleware to log incoming requests
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  console.log('Headers:', {
-    'Origin': req.headers.origin,
-    'Content-Type': req.headers['content-type'],
-    'Content-Length': req.headers['content-length'],
-    'User-Agent': req.headers['user-agent']
-  });
-  
-  next();
-});
-
-// Body parser configuration with enhanced error handling
+// Raw body parser for JSON handling
 app.use(express.json({
   limit: '10mb',
   strict: false,
   verify: (req, res, buf) => {
-    try {
-      if (buf.length > 0) {
-        JSON.parse(buf.toString());
-      }
-    } catch (err) {
-      console.error('Invalid JSON received:', buf.toString());
+    const rawBody = buf.toString();
+    // Try to parse and fix malformed JSON
+    const fixedBody = fixMalformedJson(rawBody);
+    if (fixedBody !== rawBody) {
+      console.log('Fixed malformed JSON:', fixedBody);
+      req.body = fixedBody;
     }
   }
 }));
+
+// Fallback body parser for already-parsed bodies
+app.use((req, res, next) => {
+  if (req.rawBody) {
+    req.body = fixMalformedJson(req.rawBody);
+  }
+  next();
+});
+
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Create uploads directory if it doesn't exist
@@ -112,6 +136,27 @@ if (process.env.NODE_ENV === 'production') {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+  // Handle JSON parse errors specifically
+  if (err.type === 'entity.parse.failed') {
+    // Try to fix the malformed JSON
+    const rawBody = err.body;
+    const fixedBody = fixMalformedJson(rawBody);
+    
+    if (typeof fixedBody === 'object') {
+      // Successfully fixed - retry with fixed body
+      req.body = fixedBody;
+      // Re-parse the route handler
+      return require('./routes/public')(req, res, next);
+    }
+    
+    // Return error with helpful message
+    return res.status(400).json({
+      message: 'Invalid JSON format. Please use valid JSON with double quotes around all keys and string values.',
+      example: '{"applicantName":"John Doe","email":"john@example.com","visaType":"Tourist Visa","travelPurpose":"Tourism"}',
+      received: rawBody ? rawBody.substring(0, 100) : 'unknown'
+    });
+  }
+  
   console.error('Detailed error:', {
     message: err.message,
     stack: err.stack,
