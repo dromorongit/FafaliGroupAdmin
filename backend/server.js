@@ -121,16 +121,13 @@ app.use((err, req, res, next) => {
     method: req.method
   });
   
-  // Provide more detailed error in development
+  // Always provide detailed error for debugging
   const errorResponse = {
     message: 'Something went wrong!',
+    error: err.message,
+    stack: err.stack,
     timestamp: new Date().toISOString()
   };
-  
-  if (process.env.NODE_ENV === 'development') {
-    errorResponse.error = err.message;
-    errorResponse.stack = err.stack;
-  }
   
   res.status(500).json(errorResponse);
 });
