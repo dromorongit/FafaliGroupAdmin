@@ -417,9 +417,9 @@ const publicController = {
         details: `New booking created from website: ${customerName} - ${tourName}`
       });
       
-      // Send confirmation email
+      // Send confirmation email (non-blocking - don't let email failure prevent booking creation)
       try {
-        await sendEmail(
+        sendEmail(
           customerEmail,
           `Tour Booking Received - ${savedBooking.referenceNumber}`,
           `Dear ${customerName},<br><br>` +
@@ -430,7 +430,9 @@ const publicController = {
           `Our team will contact you shortly to confirm your booking and payment details.<br><br>` +
           `Best regards,<br>` +
           `Fafali Group Tours`
-        );
+        ).catch(emailError => {
+          console.error('Failed to send booking confirmation email:', emailError.message);
+        });
       } catch (emailError) {
         console.error('Failed to send booking confirmation email:', emailError.message);
       }
@@ -447,8 +449,38 @@ const publicController = {
       });
       
     } catch (err) {
-      console.error('Error creating public booking:', err.message);
-      res.status(500).json({ message: 'Failed to submit booking' });
+      console.error('Error creating public booking:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+        code: err.code,
+        requestBody: req.body
+      });
+      
+      // Enhanced error response
+      const errorResponse = {
+        message: 'Failed to submit booking',
+        error: err.message,
+        details: 'Booking submission failed',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Add specific error information
+      if (err.name === 'ValidationError') {
+        errorResponse.validationErrors = err.errors;
+        errorResponse.message = 'Validation failed for booking submission';
+      } else if (err.code === 11000) {
+        errorResponse.duplicateError = true;
+        errorResponse.message = 'Duplicate booking detected';
+      } else if (err.message.includes('ECONNREFUSED')) {
+        errorResponse.networkError = true;
+        errorResponse.message = 'Database connection failed';
+      } else if (err.message.includes('Cast to date failed')) {
+        errorResponse.dateFormatError = true;
+        errorResponse.message = 'Invalid date format. Please use ISO format (YYYY-MM-DD)';
+      }
+      
+      res.status(500).json(errorResponse);
     }
   }
 };
