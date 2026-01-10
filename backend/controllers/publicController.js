@@ -236,12 +236,41 @@ const publicController = {
   // Public endpoint for document upload (for applicants)
   uploadApplicantDocument: async (req, res) => {
     try {
+      // Enhanced logging for debugging
+      console.log('📤 Document upload request received');
+      console.log('Request body:', req.body);
+      console.log('Request file:', req.file);
+      console.log('Request headers:', req.headers);
+       
       const { referenceNumber, email, documentType } = req.body;
-      
+       
+      // Detailed validation logging
+      console.log('Validation check:');
+      console.log('  referenceNumber:', referenceNumber, '->', !!referenceNumber);
+      console.log('  email:', email, '->', !!email);
+      console.log('  documentType:', documentType, '->', !!documentType);
+      console.log('  file:', req.file, '->', !!req.file);
+       
       if (!referenceNumber || !email || !documentType || !req.file) {
-        return res.status(400).json({ 
-          message: 'Reference number, email, document type, and file are required'
-        });
+        const errorDetails = {
+          message: 'Reference number, email, document type, and file are required',
+          missingFields: [],
+          receivedFields: {
+            referenceNumber,
+            email,
+            documentType,
+            file: !!req.file
+          }
+        };
+        
+        if (!referenceNumber) errorDetails.missingFields.push('referenceNumber');
+        if (!email) errorDetails.missingFields.push('email');
+        if (!documentType) errorDetails.missingFields.push('documentType');
+        if (!req.file) errorDetails.missingFields.push('file');
+        
+        console.error('❌ Validation failed:', errorDetails);
+        
+        return res.status(400).json(errorDetails);
       }
       
       // Find the application using applicantEmail field

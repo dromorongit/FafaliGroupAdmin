@@ -42,6 +42,14 @@ router.get('/applications/status', publicController.checkApplicationStatus);
 router.post('/documents/upload', upload.single('document'), publicController.uploadApplicantDocument);
 
 /**
+ * @route POST /api/upload/visa-document
+ * @desc Legacy endpoint for visa document upload (compatibility with external systems)
+ * @access Public
+ * @deprecated Use /api/public/documents/upload instead
+ */
+router.post('/upload/visa-document', upload.single('document'), publicController.uploadApplicantDocument);
+
+/**
  * @route GET /api/public/bookings/status
  * @desc Check booking status (for customers)
  * @access Public
