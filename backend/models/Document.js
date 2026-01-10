@@ -27,8 +27,7 @@ const documentSchema = new mongoose.Schema({
   rejectionReason: String,
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: 'User'
   },
   verifiedBy: {
     type: mongoose.Schema.Types.ObjectId,

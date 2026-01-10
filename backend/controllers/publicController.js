@@ -259,11 +259,10 @@ const publicController = {
       // Create document record
       const newDocument = new Document({
         applicationId: application._id,
-        fileName: req.file.originalname,
+        originalFileName: req.file.originalname,
         filePath: req.file.path,
-        fileType: req.file.mimetype,
         documentType,
-        uploadedBy: 'applicant',
+        uploadedBy: null, // No user ID for public uploads
         status: 'Uploaded'
       });
       

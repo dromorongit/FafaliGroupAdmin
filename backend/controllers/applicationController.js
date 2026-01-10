@@ -232,7 +232,7 @@ const applicationController = {
       }
       
       // Check if user has access (admin or createdBy)
-      if (req.user.role !== 'admin' && application.createdBy?.toString() !== req.user.id) {
+      if (req.user.role !== 'super_admin' && application.createdBy?.toString() !== req.user.id) {
         return res.status(403).json({ message: 'Access denied' });
       }
       
@@ -257,7 +257,7 @@ const applicationController = {
       
       // For non-admin users, only delete their own applications
       let query = { _id: { $in: applicationIds } };
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== 'super_admin') {
         query.createdBy = req.user.id;
       }
       
