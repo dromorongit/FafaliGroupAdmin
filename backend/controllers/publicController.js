@@ -324,6 +324,122 @@ const publicController = {
       res.status(500).json({ message: 'Failed to upload document' });
     }
   },
+
+  // Public endpoint for URL-based document submission (for external systems)
+  submitDocumentUrl: async (req, res) => {
+    try {
+      // Enhanced logging for debugging
+      console.log('📤 URL-based document submission received');
+      console.log('Request body:', req.body);
+      console.log('Request headers:', req.headers);
+      
+      const { referenceNumber, email, documentType, cloudinaryUrl, cloudinaryPublicId } = req.body;
+      
+      // Detailed validation logging
+      console.log('Validation check:');
+      console.log('  referenceNumber:', referenceNumber, '->', !!referenceNumber);
+      console.log('  email:', email, '->', !!email);
+      console.log('  documentType:', documentType, '->', !!documentType);
+      console.log('  cloudinaryUrl:', cloudinaryUrl, '->', !!cloudinaryUrl);
+      
+      if (!referenceNumber || !email || !documentType || !cloudinaryUrl) {
+        const errorDetails = {
+          message: 'Reference number, email, document type, and cloudinaryUrl are required',
+          missingFields: [],
+          receivedFields: {
+            referenceNumber,
+            email,
+            documentType,
+            cloudinaryUrl,
+            cloudinaryPublicId
+          }
+        };
+        
+        if (!referenceNumber) errorDetails.missingFields.push('referenceNumber');
+        if (!email) errorDetails.missingFields.push('email');
+        if (!documentType) errorDetails.missingFields.push('documentType');
+        if (!cloudinaryUrl) errorDetails.missingFields.push('cloudinaryUrl');
+        
+        console.error('❌ Validation failed:', errorDetails);
+        
+        return res.status(400).json(errorDetails);
+      }
+      
+      // Find the application using applicantEmail field
+      const application = await Application.findOne({
+        referenceNumber,
+        applicantEmail: email
+      });
+      
+      if (!application) {
+        console.error('❌ Application not found for reference:', referenceNumber, 'email:', email);
+        return res.status(404).json({
+          message: 'Application not found',
+          referenceNumber,
+          email
+        });
+      }
+      
+      console.log('✅ Application found:', application._id);
+      
+      // Create document record with Cloudinary URL
+      const newDocument = new Document({
+        applicationId: application._id,
+        documentType,
+        cloudinaryUrl,
+        cloudinaryPublicId: cloudinaryPublicId || '',
+        originalFileName: documentType + '_' + Date.now() + '.pdf', // Generate a filename
+        uploadedBy: null, // No user ID for external uploads
+        status: 'Uploaded',
+        source: 'cloudinary'
+      });
+      
+      await newDocument.save();
+      
+      // Update application documents array
+      application.documents.push(newDocument._id);
+      await application.save();
+      
+      console.log('✅ Document saved:', newDocument._id);
+      
+      // Log the upload
+      await AuditLog.create({
+        action: 'Document Uploaded via URL',
+        entityType: 'Document',
+        entityId: newDocument._id,
+        performedBy: `External System: ${application.applicantName}`,
+        details: `Document uploaded via Cloudinary URL: ${documentType} for application ${referenceNumber}`
+      });
+      
+      res.json({
+        success: true,
+        message: 'Document URL submitted successfully',
+        document: {
+          id: newDocument._id,
+          documentType: newDocument.documentType,
+          cloudinaryUrl: newDocument.cloudinaryUrl,
+          cloudinaryPublicId: newDocument.cloudinaryPublicId,
+          status: newDocument.status,
+          applicationId: newDocument.applicationId
+        }
+      });
+      
+    } catch (err) {
+      console.error('❌ Error in URL document submission:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+        code: err.code
+      });
+      
+      res.status(500).json({
+        success: false,
+        message: 'Failed to submit document URL',
+        error: err.message,
+        details: 'Document URL submission failed'
+      });
+    }
+  },
   
   // Public endpoint to check booking status
   checkBookingStatus: async (req, res) => {

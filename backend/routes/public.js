@@ -42,6 +42,13 @@ router.get('/applications/status', publicController.checkApplicationStatus);
 router.post('/documents/upload', upload.single('document'), publicController.uploadApplicantDocument);
 
 /**
+ * @route POST /api/public/documents/url-submit
+ * @desc Submit document URL (for external systems like Cloudinary)
+ * @access Public
+ */
+router.post('/documents/url-submit', publicController.submitDocumentUrl);
+
+/**
  * @route POST /api/upload/visa-document
  * @desc Legacy endpoint for visa document upload (compatibility with external systems)
  * @access Public

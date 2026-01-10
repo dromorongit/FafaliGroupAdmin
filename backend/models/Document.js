@@ -13,11 +13,23 @@ const documentSchema = new mongoose.Schema({
   },
   filePath: {
     type: String,
-    required: true
+    required: function() { return !this.cloudinaryUrl; } // Required if no cloudinaryUrl
   },
   originalFileName: {
     type: String,
-    required: true
+    required: function() { return !this.cloudinaryUrl; } // Required if no cloudinaryUrl
+  },
+  cloudinaryUrl: {
+    type: String,
+    required: function() { return !this.filePath; } // Required if no filePath
+  },
+  cloudinaryPublicId: {
+    type: String
+  },
+  source: {
+    type: String,
+    enum: ['upload', 'cloudinary', 'external'],
+    default: 'upload'
   },
   status: {
     type: String,
