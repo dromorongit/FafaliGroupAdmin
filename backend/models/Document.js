@@ -8,7 +8,19 @@ const documentSchema = new mongoose.Schema({
   },
   documentType: {
     type: String,
-    enum: ['passport', 'bank_statement', 'invitation_letter', 'other'],
+    enum: [
+      'passport',
+      'passport_bio_page',
+      'passport_photograph',
+      'bank_statement',
+      'proof_of_funds',
+      'travel_itinerary',
+      'hotel_booking',
+      'employment_letter',
+      'admission_letter',
+      'invitation_letter',
+      'other'
+    ],
     required: true
   },
   filePath: {

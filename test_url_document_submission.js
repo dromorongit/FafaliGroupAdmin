@@ -9,7 +9,7 @@ async function testUrlDocumentSubmission() {
     const testData = {
       referenceNumber: 'FAF-096472', // From the error logs
       email: 'dromornarh@gmail.com', // From the error logs
-      documentType: 'Passport Bio Page',
+      documentType: 'passport_bio_page', // Updated to use new enum value
       cloudinaryUrl: 'https://res.cloudinary.com/dzngjsqpe/image/upload/v1768080339/visa_documents/tme86tupfk7bmhh1paoo.jpg', // From the error logs
       cloudinaryPublicId: 'visa_documents/tme86tupfk7bmhh1paoo'
     };

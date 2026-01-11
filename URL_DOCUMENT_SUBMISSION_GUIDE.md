@@ -21,10 +21,17 @@ This guide explains how to submit document URLs to the Fafali Group Admin system
 ## Document Types
 
 Supported document types:
-- `passport`
-- `bank_statement`
-- `invitation_letter`
-- `other`
+- `passport` - General passport document
+- `passport_bio_page` - Passport bio data page
+- `passport_photograph` - Passport-sized photograph
+- `bank_statement` - Bank statement
+- `proof_of_funds` - Proof of funds document
+- `travel_itinerary` - Travel itinerary
+- `hotel_booking` - Hotel booking confirmation
+- `employment_letter` - Employment verification letter
+- `admission_letter` - School admission letter
+- `invitation_letter` - Invitation letter
+- `other` - Other document types
 
 ## Request Example
 
