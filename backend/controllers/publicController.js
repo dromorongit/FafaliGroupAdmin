@@ -491,13 +491,13 @@ const publicController = {
   // Public endpoint for website tour bookings
   createPublicBooking: async (req, res) => {
     try {
+      // Handle case where body might be stringified incorrectly
+      let bodyData = req.body;
+      
       // Enhanced logging for booking submission
       console.log('📅 Booking submission received');
       console.log('Raw request body:', bodyData);
       console.log('Request headers:', req.headers);
-      
-      // Handle case where body might be stringified incorrectly
-      let bodyData = req.body;
       
       if (typeof bodyData === 'string') {
         try {
