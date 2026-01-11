@@ -491,6 +491,11 @@ const publicController = {
   // Public endpoint for website tour bookings
   createPublicBooking: async (req, res) => {
     try {
+      // Enhanced logging for booking submission
+      console.log('📅 Booking submission received');
+      console.log('Raw request body:', bodyData);
+      console.log('Request headers:', req.headers);
+      
       // Handle case where body might be stringified incorrectly
       let bodyData = req.body;
       
@@ -512,18 +517,36 @@ const publicController = {
         }
       }
       
-      const { 
-        customerName, 
-        customerEmail, 
-        customerPhone, 
-        tourName, 
+      const {
+        customerName,
+        customerEmail,
+        customerPhone,
+        tourName,
         tourPackage,
-        departureDate, 
-        returnDate, 
-        numberOfTravelers, 
+        departureDate,
+        returnDate,
+        numberOfTravelers,
         totalAmount,
-        specialRequests
+        specialRequests,
+        serviceType,      // Capture service type from frontend
+        tourDate,        // Capture tour date from frontend
+        ...otherFields   // Capture any additional fields
       } = bodyData;
+      
+      // Log extracted fields for debugging
+      console.log('Extracted booking fields:');
+      console.log('  customerName:', customerName);
+      console.log('  customerEmail:', customerEmail);
+      console.log('  customerPhone:', customerPhone);
+      console.log('  tourName:', tourName);
+      console.log('  serviceType:', serviceType);
+      console.log('  tourDate:', tourDate);
+      console.log('  departureDate:', departureDate);
+      console.log('  returnDate:', returnDate);
+      console.log('  numberOfTravelers:', numberOfTravelers);
+      console.log('  totalAmount:', totalAmount);
+      console.log('  specialRequests:', specialRequests);
+      console.log('  otherFields:', otherFields);
       
       // Validate required fields
       if (!customerName || !customerEmail || !tourName) {
